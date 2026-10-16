@@ -50,6 +50,7 @@ import {
 import { useAuth } from '../../context/AuthContext.jsx';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner.jsx';
 import { NotificationBell } from '../../components/notifications/NotificationBell.jsx';
+import { SecureVideoPlayer } from '../../components/video/SecureVideoPlayer.jsx';
 
 
 
@@ -165,6 +166,7 @@ export const StaffDashboardView = ({ initialTab = 'overview', onNavigate }) => {
   const [videoFile, setVideoFile] = useState(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [uploadProgressText, setUploadProgressText] = useState('');
+  const [previewVideoClass, setPreviewVideoClass] = useState(null);
 
   // Staff Profile & Photo State
   const [profileData, setProfileData] = useState(null);
@@ -2070,10 +2072,21 @@ export const StaffDashboardView = ({ initialTab = 'overview', onNavigate }) => {
                                 <span>Live Online Class</span>
                               </span>
                             ) : (cls.hasLocalVideo || cls.videoId || cls.videoOriginalName) ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                <Film className="w-3 h-3 text-emerald-600" />
-                                <span>LMS Video ({formatFileSize(cls.videoSizeBytes)})</span>
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  <Film className="w-3 h-3 text-emerald-600" />
+                                  <span>LMS Video ({formatFileSize(cls.videoSizeBytes)})</span>
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewVideoClass(cls)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-[#EE2D02] hover:bg-[#D02600] text-white transition-colors cursor-pointer shadow-2xs"
+                                  title="Preview Uploaded Video"
+                                >
+                                  <Play className="w-2.5 h-2.5 fill-current" />
+                                  <span>Preview</span>
+                                </button>
+                              </div>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono text-stone-400 bg-stone-50 border border-stone-200">
                                 <span>No Video Attached</span>
@@ -2389,14 +2402,25 @@ export const StaffDashboardView = ({ initialTab = 'overview', onNavigate }) => {
                                 </div>
                               </div>
 
-                              <button
-                                type="button"
-                                onClick={() => handleDetachVideo(classToEdit.id)}
-                                className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 transition-colors shrink-0 cursor-pointer flex items-center gap-1"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                <span>Detach Video</span>
-                              </button>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewVideoClass(classToEdit)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-[#EE2D02] hover:bg-[#D02600] text-white text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                                >
+                                  <Play className="w-3 h-3 fill-current" />
+                                  <span>Preview Video</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDetachVideo(classToEdit.id)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 transition-colors shrink-0 cursor-pointer flex items-center gap-1"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Detach Video</span>
+                                </button>
+                              </div>
                             </div>
                           ) : null}
 
@@ -4444,6 +4468,39 @@ export const StaffDashboardView = ({ initialTab = 'overview', onNavigate }) => {
                   >
                     Close Notice
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Staff Lesson Video Preview Modal */}
+          {previewVideoClass && (
+            <div className="fixed inset-0 bg-stone-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-150">
+              <div className="bg-white border border-[#E8E3DC] rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 max-w-3xl w-full space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+                <div className="flex items-center justify-between pb-3.5 border-b border-[#E8E3DC]">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#EE2D02] bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100">
+                      FACULTY PREVIEW • {currentSelectedCourse?.title || 'Class Lesson'}
+                    </span>
+                    <h4 className="text-base sm:text-lg font-bold text-slate-900 mt-1">
+                      {previewVideoClass.title || `Class Day ${previewVideoClass.dayNumber || previewVideoClass.classNumber || 1}`}
+                    </h4>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewVideoClass(null)}
+                    className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="w-full">
+                  <SecureVideoPlayer
+                    courseId={selectedCourseId}
+                    classItem={previewVideoClass}
+                    isStaffPreview={true}
+                  />
                 </div>
               </div>
             </div>

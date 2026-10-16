@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   ArrowRight,
@@ -9,33 +9,54 @@ import {
   Layers,
   Code2,
   ChevronRight,
+  ChevronDown,
   Check,
+  Clock,
+  Video,
+  Users,
+  Terminal,
+  Cpu,
+  Zap,
+  GraduationCap,
+  Star,
+  Play,
+  Lock,
+  FileText,
+  CheckSquare,
+  Globe,
+  HelpCircle,
+  Send,
+  Calendar,
+  ExternalLink,
+  Laptop,
+  XCircle,
+  AlertTriangle,
+  Upload,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { DegreeSelect } from '../components/ui/DegreeSelect.jsx';
+import { StudentGrowthHero } from '../components/home/StudentGrowthHero.jsx';
+import { HowItWorksProcess } from '../components/home/HowItWorksProcess.jsx';
 
 export const HomeView = ({
-  courses,
+  courses = [],
   onNavigate,
+  onSelectCourse,
+  onApplyCourse,
 }) => {
   const { user } = useAuth();
 
-  // Direct Application Form State embedded on Home Page
+  // Registration Form State
   const [selectedCourseId, setSelectedCourseId] = useState(
     courses.length > 0 ? courses[0].id : ''
   );
-  // Clean to exactly 10 digits
+
   const extract10DigitMobile = (val) => {
     if (!val) return '';
     let digits = String(val).replace(/\D/g, '');
-    if (digits.length === 12 && digits.startsWith('91')) {
-      return digits.slice(2);
-    }
-    if (digits.length === 11 && digits.startsWith('0')) {
-      return digits.slice(1);
-    }
-    if (digits.length > 10) {
-      return digits.slice(-10);
-    }
+    if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2);
+    if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
+    if (digits.length > 10) return digits.slice(-10);
     return digits;
   };
 
@@ -52,16 +73,24 @@ export const HomeView = ({
   const [submitSuccess, setSubmitSuccess] = useState(null);
   const [submitError, setSubmitError] = useState(null);
 
+  useEffect(() => {
+    if (user) {
+      if (user.name) setFullName(user.name);
+      if (user.email) setEmail(user.email);
+      if (user.mobile) setMobile(extract10DigitMobile(user.mobile));
+      if (user.institution) setInstitution(user.institution);
+      if (user.degree) setDegree(user.degree);
+    }
+  }, [user]);
+
+  // Interactive UI States
+  const [activeDayTab, setActiveDayTab] = useState(1);
+
   const handleMobileChange = (e) => {
     let digits = e.target.value.replace(/\D/g, '');
-    if (digits.length === 12 && digits.startsWith('91')) {
-      digits = digits.slice(2);
-    } else if (digits.length === 11 && digits.startsWith('0')) {
-      digits = digits.slice(1);
-    }
-    if (digits.length > 10) {
-      digits = digits.slice(-10);
-    }
+    if (digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
+    else if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
+    if (digits.length > 10) digits = digits.slice(-10);
     setMobile(digits);
   };
 
@@ -71,6 +100,15 @@ export const HomeView = ({
   };
 
   const selectedCourse = courses.find((c) => c.id === selectedCourseId) || courses[0];
+  const publishedCourses = courses.filter((c) => c.status === 'PUBLISHED' || c.status === 'FULL');
+
+  const scrollToApply = (courseId = null) => {
+    if (courseId) setSelectedCourseId(courseId);
+    const formElement = document.getElementById('admissions-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   const handleInlineApplySubmit = async (e) => {
     e.preventDefault();
@@ -142,223 +180,189 @@ export const HomeView = ({
     }
   };
 
-  const publishedCourses = courses.filter((c) => c.status === 'PUBLISHED' || c.status === 'FULL');
 
   return (
-    <div className="space-y-12 pb-20 font-sans text-slate-900 bg-[#F8FAFC]">
-      {/* 1. COMPACT, ATTRACTIVE HERO SECTION */}
-      <section className="relative pt-10 sm:pt-14 pb-24 sm:pb-28 bg-[#0B0E14] text-white overflow-hidden">
-        {/* Subtle Ambient Radial Lighting in Brand Vermilion */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(238,45,2,0.22),transparent)] pointer-events-none" />
-        
-        {/* Modern Brand Grid Ambient Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+    <div className="space-y-12 sm:space-y-16 pb-24 font-sans text-slate-900 bg-[#F8FAFC]">
+      {/* Hero & Process Flow with Tightened Cohesive Spacing */}
+      <div className="space-y-3 sm:space-y-6">
+        {/* =================================================================== */}
+        {/* 1. STUDENT GROWTH HERO: Step on Knowledge, Rise into Success        */}
+        {/* =================================================================== */}
+        <StudentGrowthHero
+          onNavigate={onNavigate}
+          onScrollToApply={() => {
+            const el = document.getElementById('admissions-form');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto space-y-3.5">
-            {/* Headline */}
-            <h1 className="text-2xl sm:text-4xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Master Production Systems & Advanced Engineering.
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
-              Cohort-based technical specializations taught by senior principal architects.
-            </p>
-          </div>
-        </div>
-      </section>
+        {/* =================================================================== */}
+        {/* 2. HOW IT WORKS: Simple Steps. Real Progress.                       */}
+        {/* =================================================================== */}
+        <HowItWorksProcess onExplore={() => onNavigate && onNavigate('courses')} />
+      </div>
 
-      {/* 2. DIRECT ADMISSIONS REGISTRATION FORM CARD */}
-      <section className="max-w-4xl mx-auto px-3 sm:px-6 -mt-16 sm:-mt-20 relative z-20">
-        <div className="bg-white border border-slate-200/90 rounded-[24px] sm:rounded-[36px] p-4 sm:p-8 lg:p-10 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_12px_30px_-5px_rgba(0,0,0,0.06)] space-y-6">
-          <div className="border-b border-slate-100 pb-5">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Student Registration Form
-            </h2>
+
+
+
+      {/* =================================================================== */}
+      {/* 5. DIRECT ADMISSIONS REGISTRATION FORM CARD                         */}
+      {/* =================================================================== */}
+      <section id="admissions-form" className="max-w-4xl mx-auto px-4 sm:px-6 scroll-mt-24">
+        <div className="bg-white border border-slate-200/90 rounded-[28px] sm:rounded-[36px] p-6 sm:p-10 shadow-[0_20px_50px_-15px_rgba(15,23,42,0.1)] space-y-6">
+          <div className="border-b border-slate-100 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#EE2D02] bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100">
+                Admissions Portal
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-1 font-display">
+                Student Admission Application
+              </h2>
+            </div>
+
           </div>
 
           {/* Alert Messages */}
           {submitError && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 font-medium">
+            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{submitError}</span>
             </div>
           )}
 
           {submitSuccess && (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-1">
-              <div className="flex items-center gap-2 font-bold text-sm text-emerald-800">
-                <Check className="w-4 h-4 text-emerald-600" />
-                <span>Application Submitted! App #{submitSuccess.applicationNumber}</span>
+            <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-emerald-900">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <span>Application Submitted Successfully! 🎉</span>
               </div>
-              <p className="text-slate-700 text-xs">
-                Your seat for <strong>{submitSuccess.courseTitle}</strong> has been registered. You can complete your fee payment in your dashboard.
+              <p className="text-xs text-emerald-800">
+                Application Reference: <strong className="font-mono">{submitSuccess.applicationNumber}</strong> for <strong>{submitSuccess.courseTitle}</strong>.
               </p>
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate('student')}
+                  className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition-colors cursor-pointer"
+                >
+                  Go to Student Portal
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Application Form */}
-          <form onSubmit={handleInlineApplySubmit} className="space-y-4">
-            {/* Course Selection Dropdown */}
+          <form onSubmit={handleInlineApplySubmit} className="space-y-5">
+            {/* 1. Target Course Selection */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Select Academic Program *
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                1. Select Masterclass Specialization *
               </label>
               <select
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-3 text-sm text-slate-900 outline-none font-semibold transition-all cursor-pointer"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#EE2D02] focus:ring-1 focus:ring-[#EE2D02] cursor-pointer"
+                required
               >
-                {publishedCourses.map((c) => (
+                {courses.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {cleanCourseTitle(c.title)}{c.duration ? ` (${c.duration})` : ''}
+                    {cleanCourseTitle(c.title)} (Starts: {c.startDate || 'Daily'})
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Candidate Details Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* 2. Personal Details Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Full Legal Name *
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Full Name *
                 </label>
                 <input
                   type="text"
-                  required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Priya Sharma"
-                  className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 sm:py-3 text-sm text-slate-900 outline-none transition-all"
+                  placeholder="e.g. Aditi Sharma"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#EE2D02] focus:ring-1 focus:ring-[#EE2D02]"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Official Email Address *
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Email Address *
                 </label>
                 <input
                   type="email"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. priya.sharma@domain.com"
-                  className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 sm:py-3 text-sm text-slate-900 outline-none transition-all"
+                  placeholder="e.g. aditi.sharma@gmail.com"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#EE2D02] focus:ring-1 focus:ring-[#EE2D02]"
+                  required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-                  <span>WhatsApp Mobile Number *</span>
-                  {mobile && (
-                    <span className={`text-[10px] font-mono font-bold ${mobile.length === 10 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      {mobile.length === 10 ? '✓ 10 Digits' : `${mobile.length}/10`}
-                    </span>
-                  )}
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Mobile Number (10 digits) *
                 </label>
-                <div className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus-within:bg-white border border-slate-200 focus-within:border-[#EE2D02] focus-within:ring-2 focus-within:ring-[#EE2D02]/15 rounded-full flex items-center transition-all overflow-hidden">
-                  <div className="flex items-center gap-1.5 pl-3.5 pr-2.5 py-2.5 sm:py-3 border-r border-slate-200 select-none shrink-0 bg-slate-100/70 text-slate-800 font-mono font-bold text-xs sm:text-sm">
-                    <span className="text-sm leading-none">🇮🇳</span>
-                    <span>+91</span>
-                  </div>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400">
+                    +91
+                  </span>
                   <input
                     type="tel"
-                    required
-                    inputMode="numeric"
-                    maxLength={10}
                     value={mobile}
                     onChange={handleMobileChange}
-                    placeholder="Enter 10-digit mobile"
-                    className="w-full min-w-0 flex-1 bg-transparent px-3.5 py-2.5 sm:py-3 text-sm text-slate-900 outline-none font-mono placeholder:font-sans placeholder:text-slate-400"
+                    maxLength={10}
+                    placeholder="9876543210"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:outline-none focus:border-[#EE2D02] focus:ring-1 focus:ring-[#EE2D02]"
+                    required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  College / Company
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  College / Institution *
                 </label>
                 <input
                   type="text"
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
-                  placeholder="Stanford / Microsoft"
-                  className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 sm:py-3 text-sm text-slate-900 outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Degree / Current Role
-                </label>
-                <input
-                  type="text"
-                  value={degree}
-                  onChange={(e) => setDegree(e.target.value)}
-                  placeholder="B.Tech CS / SDE 2"
-                  className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 sm:py-3 text-sm text-slate-900 outline-none transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Preferred Batch */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Preferred Batch Schedule
-                </label>
-                <select
-                  value={batch}
-                  onChange={(e) => setBatch(e.target.value)}
-                  className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 sm:py-3 text-sm text-slate-900 outline-none font-medium transition-all"
-                >
-                  <option value="Weekend Evening">Weekend Evening (Sat & Sun 6:00 - 9:00 PM IST)</option>
-                  <option value="Weekday Morning">Weekday Morning (Tue & Thu 7:30 - 9:30 AM IST)</option>
-                  <option value="Executive Fast-Track">Executive Fast-Track (Intensive 4-Week Format)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Preferred Course Start Date
-                </label>
-                <input
-                  type="date"
+                  placeholder="e.g. Anna University / IIT Madras"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#EE2D02] focus:ring-1 focus:ring-[#EE2D02]"
                   required
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2 sm:py-2.5 text-sm text-slate-900 outline-none font-mono font-semibold transition-all"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Primary Learning Objective
-                </label>
-                <input
-                  type="text"
-                  value={sop}
-                  onChange={(e) => setSop(e.target.value)}
-                  placeholder="e.g. Lead Staff Architect interviews"
-                  className="w-full bg-[#F8FAFC] hover:bg-[#F1F5F9] focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 sm:py-3 text-sm text-slate-900 outline-none transition-all"
                 />
               </div>
             </div>
 
-            {/* Submit Button */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Degree / Specialization *
+              </label>
+              <DegreeSelect
+                value={degree}
+                onChange={setDegree}
+                placeholder="Search or select degree (e.g. B.Tech CSE, BCA, B.Sc Computer Science...)"
+                rounded="rounded-xl"
+              />
+            </div>
+
+            {/* Submit & Guarantee Strip */}
             <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
               <div className="text-xs text-slate-500 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#EE2D02] shrink-0" />
-                <span>Verified Razorpay Gateway & Instant PDF Tax Invoice</span>
+                <span>Verified Razorpay Gateway & Instant 18% GST Tax Invoice</span>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 bg-[#EE2D02] hover:bg-[#D42700] text-white font-bold text-sm rounded-full shadow-md hover:shadow-lg shadow-[#EE2D02]/25 transition-all active:scale-[0.99] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#EE2D02] hover:bg-[#D42700] text-white font-bold text-sm rounded-full shadow-md hover:shadow-lg shadow-[#EE2D02]/25 transition-all active:scale-[0.99] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                <span>{user ? 'Submit Application & Reserve Seat' : 'Sign In & Submit Application'}</span>
+                <span>{user ? 'Submit Application & Reserve Seat' : 'Sign In & Reserve Seat'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -366,79 +370,11 @@ export const HomeView = ({
         </div>
       </section>
 
-      {/* 3. CATALOG REDIRECT BANNER */}
-      <section className="max-w-4xl mx-auto px-3 sm:px-6">
-        <div className="p-4 sm:p-6 rounded-[24px] sm:rounded-[28px] bg-white border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#FFF1EE] text-[#EE2D02] border border-[#FFD4CC] flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">
-                Want to review full curriculum modules & faculty?
-              </h3>
-              <p className="text-xs text-slate-500">
-                Explore detailed course overviews, weekly topics, and project milestones in the Course Catalog.
-              </p>
-            </div>
-          </div>
 
-          <button
-            onClick={() => onNavigate('courses')}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#FFF1EE] hover:bg-[#FFE5E0] text-[#EE2D02] font-bold text-xs border border-[#FFD4CC] transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-2xs"
-          >
-            <span>Browse Catalog</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </section>
 
-      {/* 4. VALUE PILLARS: WHY CLAXIC COHORTS */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-2">
-        <div className="text-center max-w-xl mx-auto mb-8 space-y-1.5">
-          <span className="text-xs font-bold text-[#EE2D02] uppercase tracking-wider">
-            Pedagogical Excellence
-          </span>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            Engineered for Practitioners
-          </h2>
-          <p className="text-xs text-slate-600">
-            Every track is designed from first principles with real-world infrastructure and architectural rigor.
-          </p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="bg-white border border-slate-200/90 p-6 rounded-[24px] space-y-3 shadow-2xs hover:shadow-md hover:border-[#FFD4CC] transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-[#FFF1EE] text-[#EE2D02] border border-[#FFD4CC] flex items-center justify-center">
-              <Layers className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900">Production-Scale Architecture</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Deploy distributed systems, vector search pipelines, and Kubernetes clusters designed to handle real enterprise workloads.
-            </p>
-          </div>
 
-          <div className="bg-white border border-slate-200/90 p-6 rounded-[24px] space-y-3 shadow-2xs hover:shadow-md hover:border-[#FFD4CC] transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-[#FFF1EE] text-[#EE2D02] border border-[#FFD4CC] flex items-center justify-center">
-              <Code2 className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900">Direct 1-on-1 Mentorship</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Receive line-by-line code evaluations and private architecture mock interviews with principal architects.
-            </p>
-          </div>
 
-          <div className="bg-white border border-slate-200/90 p-6 rounded-[24px] space-y-3 shadow-2xs hover:shadow-md hover:border-[#FFD4CC] transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-[#FFF1EE] text-[#EE2D02] border border-[#FFD4CC] flex items-center justify-center">
-              <Award className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900">Verifiable Invoices & Certificates</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Cryptographically signed certificate of mastery, verifiable portfolio links, and 18% GST tax invoices for reimbursement.
-            </p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

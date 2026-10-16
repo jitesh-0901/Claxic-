@@ -20,7 +20,7 @@
     },
     {
       "id": "usr_admin_jitesh_genkit",
-      "name": "Jitesh",
+      "name": "Jitesh p",
       "email": "jitesh.genkit@gmail.com",
       "mobile": "+91 8220945226",
       "role": "USER",
@@ -33,7 +33,7 @@
       "passwordHash": "a7a08807775ad909fc38d3ed361ec0b45cde4af0d16d0bd6ea393f69ec3b4dd30d8379296e0c974558059326ac7695e2c4a157b0ef8ac356f7ac35d9e3bd7a40",
       "salt": "claxic_salt_admin_2026",
       "createdAt": "2026-08-30T06:12:06.328Z",
-      "updatedAt": "2026-10-09T08:21:09.519Z",
+      "updatedAt": "2026-10-12T12:25:51.578Z",
       "currentPassword": "Admin@123456"
     },
     {
@@ -165,6 +165,36 @@
           "hasLocalVideo": true,
           "videoUploadedAt": "2026-10-10T16:37:12.253Z",
           "updatedAt": "2026-10-10T16:37:12.253Z"
+        },
+        {
+          "id": "cls_crs_e4f24ee662e73f92_1791789492959",
+          "classNumber": 2,
+          "dayNumber": 2,
+          "title": "Day 2:",
+          "description": "",
+          "videoUrl": "/api/learning/courses/crs_e4f24ee662e73f92/classes/cls_crs_e4f24ee662e73f92_1791789492959/video-stream",
+          "duration": "30 sec",
+          "resourcesUrl": "",
+          "topics": [],
+          "summary": "",
+          "learningMaterials": [],
+          "test": null,
+          "status": "PUBLISHED",
+          "deliveryType": "UPLOAD",
+          "liveMeetingUrl": "",
+          "liveMeetingTime": "",
+          "liveMeetingInstructions": "",
+          "uploadedAt": "2026-10-12T07:18:12.958Z",
+          "uploadedBy": "Mrs.Dr. Marie",
+          "videoId": "vid_a33376adf9d4953d",
+          "videoOriginalName": "gemini_generated_video_df0eb839.mp4",
+          "videoStoredName": "vid_1791789495270_6a49d9ff.mp4",
+          "videoSizeBytes": 5814559,
+          "videoMimeType": "video/mp4",
+          "videoPath": "/api/learning/courses/crs_e4f24ee662e73f92/classes/cls_crs_e4f24ee662e73f92_1791789492959/video-stream",
+          "hasLocalVideo": true,
+          "videoUploadedAt": "2026-10-12T07:18:15.774Z",
+          "updatedAt": "2026-10-12T07:18:15.774Z"
         }
       ]
     }
@@ -200,7 +230,7 @@
         "scholarshipRequested": false
       },
       "createdAt": "2026-10-09T15:50:14.419Z",
-      "updatedAt": "2026-10-10T06:55:34.670Z",
+      "updatedAt": "2026-10-16T11:04:59.061Z",
       "reviewNotes": "",
       "adminNotes": ""
     }
@@ -500,10 +530,6 @@
       "userId": "usr_admin_jitesh",
       "expiresAt": "2026-10-16T06:03:19.203Z"
     },
-    "stk_ad81d7114b1813eb6bd23c0c1f607c09ab2c99e881dd91515c5c141cf0dcf145": {
-      "userId": "usr_admin_jitesh_genkit",
-      "expiresAt": "2026-10-16T12:49:17.863Z"
-    },
     "stk_047d53e72bee8a0d443d28c7e16bcb833ed3f8689edea6301cd36d9ab2724be6": {
       "userId": "usr_admin_jitesh",
       "expiresAt": "2026-10-16T12:50:38.639Z"
@@ -520,13 +546,25 @@
       "userId": "usr_admin_jitesh",
       "expiresAt": "2026-10-17T16:35:38.546Z"
     },
-    "stk_018a6f626facddd8a8eb7e970a0827de546c128a4b42c41d1522ee36916bacf5": {
-      "userId": "usr_f36cfcf1d5c8cae9",
-      "expiresAt": "2026-10-17T16:52:25.830Z"
-    },
     "stk_1036dffe37df9831fe6157c40d8998f4f20e158f6450feef4807f688e2a4058b": {
       "userId": "usr_admin_jitesh",
       "expiresAt": "2026-10-17T19:16:50.284Z"
+    },
+    "stk_6941185604625f83779c21cab1e9db400a96074d6055701ad66a2b7213d8ec18": {
+      "userId": "usr_admin_jitesh_genkit",
+      "expiresAt": "2026-10-23T10:59:09.342Z"
+    },
+    "stk_e56377689f7ed815d52ba737640718de0c526a57fc4abcffcef4b95bb0aa5275": {
+      "userId": "usr_admin_jitesh_genkit",
+      "expiresAt": "2026-10-23T10:59:55.357Z"
+    },
+    "stk_ab37e36430dfecc8efba70e272805f8e80a82aaeb791d6057a72a716579b0a66": {
+      "userId": "usr_admin_jitesh",
+      "expiresAt": "2026-10-23T11:02:16.812Z"
+    },
+    "stk_2556e59db52735c2e97d01ac941a07cdf15fd1a106f1cb061367e9414cf3c2f4": {
+      "userId": "usr_f36cfcf1d5c8cae9",
+      "expiresAt": "2026-10-23T11:04:32.513Z"
     }
   },
   "verificationTokens": [
@@ -556,13 +594,60 @@
   ],
   "notifications": [
     {
+      "id": "notif_vid_1791789495775_uir817",
+      "userId": "usr_admin_jitesh_genkit",
+      "title": "🎬 Video Ready: Day 2 - Day 2:",
+      "message": "High-definition video for \"Day 2:\" in \"Ai Essential\" has been uploaded and is ready for streaming. Watch it in your Student Portal!",
+      "type": "CREATIVE_CLASS",
+      "link": "/student",
+      "isRead": true,
+      "createdAt": "2026-10-12T07:18:15.774Z",
+      "meta": {
+        "courseId": "crs_e4f24ee662e73f92",
+        "courseTitle": "Ai Essential",
+        "dayNumber": 2,
+        "classTitle": "Day 2:",
+        "instructorName": "Mrs.Dr. Marie",
+        "authorName": "Mrs.Dr. Marie",
+        "badge": "VIDEO READY",
+        "actionLabel": "Watch Class Video"
+      }
+    },
+    {
+      "id": "notif_class_1791789492961_kmlhev",
+      "userId": "usr_admin_jitesh_genkit",
+      "title": "🎬 New Class Uploaded: Day 2 - Day 2:",
+      "message": "Day 2 class \"Day 2:\" has been uploaded for \"Ai Essential\". Duration: 30 sec. Topics: Curriculum core.",
+      "type": "CREATIVE_CLASS",
+      "link": "/student",
+      "isRead": true,
+      "createdAt": "2026-10-12T07:18:12.958Z",
+      "meta": {
+        "courseId": "crs_e4f24ee662e73f92",
+        "courseTitle": "Ai Essential",
+        "dayNumber": 2,
+        "classTitle": "Day 2:",
+        "duration": "30 sec",
+        "topics": [],
+        "deliveryType": "UPLOAD",
+        "liveMeetingUrl": "",
+        "liveMeetingTime": "",
+        "liveMeetingInstructions": "",
+        "instructorName": "Mrs.Dr. Marie",
+        "authorName": "Mrs.Dr. Marie",
+        "badge": "CLASS LESSON",
+        "actionLabel": "Watch Class",
+        "hasNotes": false
+      }
+    },
+    {
       "id": "notif_qvfi8wb",
       "userId": "usr_admin_jitesh_genkit",
       "title": "Faculty Answered Your Question: Day 1:",
       "message": "Mrs.Dr. Marie responded: \"what is your dout pa ?...\"",
       "type": "success",
       "link": "/dashboard",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-10T19:15:32.171Z",
       "meta": null
     },
@@ -8116,6 +8201,20 @@
   ],
   "emailRecords": [
     {
+      "id": "eml_gel3i8a",
+      "toEmail": "jitesh.genkit@gmail.com",
+      "subject": "🎬 New Video Lecture Available: Day 2 - Day 2: (Ai Essential)",
+      "previewText": "\n        \n          \n            \n              🎬 Video Lecture Ready\n            \n            \n              Day 2: Da",
+      "timestamp": "2026-10-12T07:18:16.622Z"
+    },
+    {
+      "id": "eml_jnm7skt",
+      "toEmail": "jitesh.genkit@gmail.com",
+      "subject": "🎬 New Class Uploaded: Day 2 - Day 2: (Ai Essential)",
+      "previewText": "\n        \n          \n            \n              🔔 New Curriculum Session\n            \n            \n              Day 2:",
+      "timestamp": "2026-10-12T07:18:14.356Z"
+    },
+    {
       "id": "eml_6ea9xau",
       "toEmail": "jitesh.genkit@gmail.com",
       "subject": "🎬 New Video Lecture Available: Day 1 - Day 1: (Ai Essential)",
@@ -8544,7 +8643,9 @@
       "courseId": "crs_e4f24ee662e73f92",
       "startDate": "2026-10-10",
       "completedClasses": [
-        "cls_crs_e4f24ee662e73f92_1"
+        "cls_crs_e4f24ee662e73f92_1",
+        "cls_crs_e4f24ee662e73f92_1791789492959",
+        "cls_crs_e4f24ee662e73f92_1791650229110"
       ],
       "testResults": [],
       "attendance": [
@@ -8567,10 +8668,18 @@
           "classId": "cls_crs_e4f24ee662e73f92_1791650229110",
           "date": "2026-10-10",
           "attended": true
-        }
+        },
+        {
+          "classId": "cls_crs_e4f24ee662e73f92_1791789492959",
+          "date": "2026-10-12",
+          "status": "PRESENT",
+          "verifiedAt": "2026-10-12T08:52:28.634Z"
+        },
+        "cls_crs_e4f24ee662e73f92_1791789492959",
+        "cls_crs_e4f24ee662e73f92_1791650229110"
       ],
-      "progressPercent": 0,
-      "updatedAt": "2026-10-10T17:14:28.011Z"
+      "progressPercent": 100,
+      "updatedAt": "2026-10-12T12:43:37.540Z"
     }
   ],
   "doubts": [
@@ -8620,7 +8729,50 @@
       "filePath": "D:\\claxic\\backend\\uploads\\videos\\vid_1791650231086_b168417f.mp4",
       "storedName": "vid_1791650231086_b168417f.mp4",
       "fileSizeBytes": 8930533
+    },
+    {
+      "id": "vid_a33376adf9d4953d",
+      "courseId": "crs_e4f24ee662e73f92",
+      "classId": "cls_crs_e4f24ee662e73f92_1791789492959",
+      "originalName": "gemini_generated_video_df0eb839.mp4",
+      "filename": "vid_1791789495270_6a49d9ff.mp4",
+      "storagePath": "D:\\claxic\\backend\\uploads\\videos\\vid_1791789495270_6a49d9ff.mp4",
+      "mimeType": "video/mp4",
+      "sizeBytes": 5814559,
+      "durationSeconds": 0,
+      "uploadedBy": "usr_f36cfcf1d5c8cae9",
+      "uploadedAt": "2026-10-12T07:18:16.033Z",
+      "filePath": "D:\\claxic\\backend\\uploads\\videos\\vid_1791789495270_6a49d9ff.mp4",
+      "storedName": "vid_1791789495270_6a49d9ff.mp4",
+      "fileSizeBytes": 5814559
     }
   ],
-  "lessonPlaybackProgress": []
+  "lessonPlaybackProgress": [
+    {
+      "id": "prog_be8e4a3675ef2598",
+      "userId": "usr_admin_jitesh_genkit",
+      "courseId": "crs_e4f24ee662e73f92",
+      "classId": "cls_crs_e4f24ee662e73f92_1791789492959",
+      "lastPosition": 0,
+      "furthestPosition": 0,
+      "watchedSeconds": 86,
+      "durationSeconds": 0,
+      "completed": true,
+      "completedAt": "2026-10-12T08:52:28.634Z",
+      "updatedAt": "2026-10-12T08:52:42.436Z"
+    },
+    {
+      "id": "prog_45a4955ae956b3b8",
+      "userId": "usr_admin_jitesh_genkit",
+      "courseId": "crs_e4f24ee662e73f92",
+      "classId": "cls_crs_e4f24ee662e73f92_1791650229110",
+      "lastPosition": 0,
+      "furthestPosition": 0,
+      "watchedSeconds": 6,
+      "durationSeconds": 0,
+      "completed": false,
+      "completedAt": null,
+      "updatedAt": "2026-10-12T12:43:01.912Z"
+    }
+  ]
 }

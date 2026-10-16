@@ -22,6 +22,7 @@ export const SecureVideoPlayer = ({
   classItem,
   onPlaybackCompleted,
   onProgressUpdate,
+  isStaffPreview = false,
 }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -40,11 +41,11 @@ export const SecureVideoPlayer = ({
   const [bufferedEnd, setBufferedEnd] = useState(0);
   const controlsTimeoutRef = useRef(null);
 
-  // Security & 75% Rule States
+  // Security & 75% Rule States (staff can seek freely in preview mode)
   const [watchedSeconds, setWatchedSeconds] = useState(0);
   const [furthestPosition, setFurthestPosition] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [canSkipForward, setCanSkipForward] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(isStaffPreview);
+  const [canSkipForward, setCanSkipForward] = useState(isStaffPreview);
   const [warningMessage, setWarningMessage] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -70,13 +71,19 @@ export const SecureVideoPlayer = ({
       : url;
   };
 
-  // Determine effective media source
-  const effectiveVideoSrc =
-    classItem.hasLocalVideo || classItem.videoId || classItem.videoStoredName || !classItem.videoUrl
-      ? localStreamUrl
-      : classItem.videoUrl.startsWith('http') || classItem.videoUrl.startsWith('/')
-      ? classItem.videoUrl
-      : localStreamUrl;
+  // Determine effective media source - always ensure token query param is attached to local endpoints
+  const effectiveVideoSrc = (() => {
+    if (isYouTube) return getYouTubeEmbedUrl(classItem.videoUrl);
+    if (classItem.hasLocalVideo || classItem.videoId || classItem.videoStoredName || !classItem.videoUrl) {
+      return localStreamUrl;
+    }
+    if (typeof classItem.videoUrl === 'string' && classItem.videoUrl.includes('/video-stream')) {
+      return classItem.videoUrl.includes('token=')
+        ? classItem.videoUrl
+        : `${classItem.videoUrl}${classItem.videoUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
+    }
+    return classItem.videoUrl || localStreamUrl;
+  })();
 
   // Fetch initial playback progress
   useEffect(() => {
@@ -506,6 +513,20 @@ export const SecureVideoPlayer = ({
         onClick={handlePlayPause}
         className="w-full aspect-video object-contain bg-black cursor-pointer"
       />
+
+      {/* Prominent Center Play Button Overlay when Paused */}
+      {!isPlaying && !isBuffering && !playbackError && (
+        <button
+          type="button"
+          onClick={handlePlayPause}
+          className="absolute inset-0 flex items-center justify-center bg-black/25 hover:bg-black/35 transition-all z-20 group cursor-pointer"
+          aria-label="Play Lecture Video"
+        >
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#EE2D02] hover:bg-[#D02600] text-white flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110 active:scale-95 border-2 border-white/30">
+            <Play className="w-7 h-7 sm:w-9 sm:h-9 ml-1 fill-white" />
+          </div>
+        </button>
+      )}
 
       {/* Buffering Spinner Overlay */}
       {isBuffering && !playbackError && (

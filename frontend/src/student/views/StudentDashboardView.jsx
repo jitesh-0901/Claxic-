@@ -21,6 +21,7 @@ import {
   Trash2,
   Lock,
   Play,
+  Pause,
   Video,
   CheckSquare,
   Sparkles,
@@ -1228,7 +1229,7 @@ export const StudentDashboardView = ({
 
               const filteredSchedule = (activeCourse.schedule || []).filter((cls) => {
                 if (classFilter === 'ALL') return true;
-                if (classFilter === 'TODAY') return cls.status === 'TODAY';
+                if (classFilter === 'TODAY') return cls.isToday || cls.status === 'TODAY';
                 if (classFilter === 'COMPLETED') return cls.status === 'COMPLETED';
                 if (classFilter === 'UPCOMING') return cls.status === 'UPCOMING';
                 return true;
@@ -1418,7 +1419,7 @@ export const StudentDashboardView = ({
                         }`}
                       >
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>Today's Class</span>
+                        <span>Today's Class ({activeCourse.schedule.filter((c) => c.isToday || c.status === 'TODAY').length})</span>
                       </button>
 
                       <button
@@ -1921,7 +1922,7 @@ export const StudentDashboardView = ({
                           /* Secure Video Learning Player with 75% Watch Completion & Restricted Skip */
                           <div className="w-full">
                             <SecureVideoPlayer
-                              courseId={selectedLearningCourseId || enrolledCourses[0]?.courseId}
+                              courseId={activeCourse?.courseId || selectedLearningCourseId || enrolledCourses[0]?.courseId}
                               classItem={activeClassForVideo}
                               onProgressUpdate={(prog) => {
                                 setVideoProgress(prog);

@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, '../frontend/dist');
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;   
 
 // Middlewares
 app.use(cors({ origin: '*', credentials: true }));
