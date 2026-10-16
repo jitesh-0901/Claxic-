@@ -1,0 +1,682 @@
+import React, { useState, useEffect } from 'react';
+import {
+  ShieldCheck,
+  CreditCard,
+  User,
+  School,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  Lock,
+  ArrowRight,
+} from 'lucide-react';
+import { Modal } from '../../components/ui/Modal.jsx';
+import { Button } from '../../components/ui/Button.jsx';
+import { Badge } from '../../components/ui/Badge.jsx';
+import { DegreeSelect } from '../../components/ui/DegreeSelect.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import confetti from 'canvas-confetti';
+
+export const ApplicationModal = ({ isOpen, onClose, course, onSuccess }) => {
+  const { user } = useAuth();
+  const [step, setStep] = useState('form');
+
+  // Clean to exactly 10 digits
+  const extract10DigitMobile = (val) => {
+    if (!val) return '';
+    let digits = String(val).replace(/\D/g, '');
+    if (digits.length === 12 && digits.startsWith('91')) {
+      return digits.slice(2);
+    }
+    if (digits.length === 11 && digits.startsWith('0')) {
+      return digits.slice(1);
+    }
+    if (digits.length > 10) {
+      return digits.slice(-10);
+    }
+    return digits;
+  };
+
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [institution, setInstitution] = useState('');
+  const [degree, setDegree] = useState('');
+  const [yearOfStudy, setYearOfStudy] = useState('Final Year');
+  const [experienceLevel, setExperienceLevel] = useState('Intermediate');
+  const [statementOfIntent, setStatementOfIntent] = useState('');
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(true);
+  const [agreedToRefundPolicy, setAgreedToRefundPolicy] = useState(true);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [draftSavedMessage, setDraftSavedMessage] = useState(null);
+  const [error, setError] = useState(null);
+  const [submittedApp, setSubmittedApp] = useState(null);
+  const [paymentOrder, setPaymentOrder] = useState(null);
+
+  const handleMobileChange = (e) => {
+    let digits = e.target.value.replace(/\D/g, '');
+    if (digits.length === 12 && digits.startsWith('91')) {
+      digits = digits.slice(2);
+    } else if (digits.length === 11 && digits.startsWith('0')) {
+      digits = digits.slice(1);
+    }
+    if (digits.length > 10) {
+      digits = digits.slice(-10);
+    }
+    setMobile(digits);
+  };
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.name || '');
+      setEmail(user.email || '');
+      setMobile(extract10DigitMobile(user.mobile));
+      setInstitution(user.institution || '');
+      setDegree(user.degree || '');
+      if (user.yearOfStudy) setYearOfStudy(user.yearOfStudy);
+    }
+
+    // Check if there is an existing draft for this user & course
+    if (user && course && isOpen) {
+      const token = localStorage.getItem('claxic_token');
+      if (token) {
+        fetch(`/api/applications/draft/${course.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.draft && data.draft.formData) {
+              const fd = data.draft.formData;
+              if (fd.fullName) setFullName(fd.fullName);
+              if (fd.email) setEmail(fd.email);
+              if (fd.mobile) setMobile(extract10DigitMobile(fd.mobile));
+              if (fd.institution) setInstitution(fd.institution);
+              if (fd.degree) setDegree(fd.degree);
+              if (fd.yearOfStudy) setYearOfStudy(fd.yearOfStudy);
+              if (fd.experienceLevel) setExperienceLevel(fd.experienceLevel);
+              if (fd.statementOfIntent) setStatementOfIntent(fd.statementOfIntent);
+              if (fd.startDate) setStartDate(fd.startDate);
+              setDraftSavedMessage('Restored previous saved draft.');
+              setTimeout(() => setDraftSavedMessage(null), 3000);
+            }
+          })
+          .catch(() => { });
+      }
+    }
+
+    setStep('form');
+    setError(null);
+  }, [user, isOpen, course]);
+
+  const handleSaveDraft = async () => {
+    if (!course) return;
+    setIsSavingDraft(true);
+    setError(null);
+    setDraftSavedMessage(null);
+    try {
+      const token = localStorage.getItem('claxic_token');
+      const res = await fetch('/api/applications/draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          courseId: course.id,
+          formData: {
+            fullName: fullName.trim(),
+            email: email.trim(),
+            mobile: mobile ? `+91 ${mobile.trim()}` : '',
+            institution: institution.trim(),
+            degree: degree.trim(),
+            yearOfStudy,
+            experienceLevel,
+            statementOfIntent: statementOfIntent.trim(),
+            startDate: startDate || new Date().toISOString().split('T')[0],
+            agreedToTerms,
+            agreedToPrivacy,
+            agreedToRefundPolicy,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save draft.');
+      setDraftSavedMessage('Draft progress saved! You can resume anytime.');
+      setTimeout(() => setDraftSavedMessage(null), 4000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  if (!course) return null;
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    if (mobile && mobile.length !== 10) {
+      setError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    if (!agreedToTerms || !agreedToPrivacy || !agreedToRefundPolicy) {
+      setError('You must accept all terms and policy conditions to proceed.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const token = localStorage.getItem('claxic_token');
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          courseId: course.id,
+          formData: {
+            fullName: fullName.trim(),
+            email: email.trim(),
+            mobile: mobile ? `+91 ${mobile.trim()}` : '',
+            institution: institution.trim(),
+            degree: degree.trim(),
+            yearOfStudy,
+            experienceLevel,
+            statementOfIntent: statementOfIntent.trim(),
+            startDate: startDate || new Date().toISOString().split('T')[0],
+            agreedToTerms,
+            agreedToPrivacy,
+            agreedToRefundPolicy,
+          },
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit application.');
+      }
+
+      setSubmittedApp(data.application);
+
+      // Free Course: Bypass payment gateway and grant instant enrollment!
+      if (course.isFree || course.price === 0) {
+        confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+        setStep('free_success');
+        if (onSuccess) onSuccess(data.application?.applicationNumber || 'FREE_ENROLLMENT');
+        return;
+      }
+
+      // Create Razorpay Order
+      const orderRes = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ applicationId: data.application.id }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData.error || 'Failed to initialize payment gateway order.');
+      }
+
+      setPaymentOrder(orderData);
+      setStep('payment');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRazorpayCheckout = () => {
+    if (!paymentOrder) return;
+
+    if (window.Razorpay) {
+      const options = {
+        key: paymentOrder.keyId,
+        amount: paymentOrder.amount,
+        currency: paymentOrder.currency,
+        name: 'Claxic Institute of Advanced Technology',
+        description: `Enrollment Fee — ${course.title}`,
+        order_id: paymentOrder.orderId,
+        prefill: {
+          name: paymentOrder.userName,
+          email: paymentOrder.userEmail,
+          contact: paymentOrder.userMobile,
+        },
+        theme: { color: '#4F46E5' },
+        handler: async (response) => {
+          verifyPaymentOnBackend(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature);
+        },
+        modal: {
+          ondismiss: () => console.log('Payment modal dismissed'),
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } else {
+      simulatePaymentSuccess();
+    }
+  };
+
+  const simulatePaymentSuccess = async () => {
+    if (!paymentOrder || !submittedApp) return;
+    const simOrder = paymentOrder.orderId;
+    const simPayment = 'pay_sim_' + Math.random().toString(36).substring(2, 9);
+    const simSignature = 'sig_sim_' + Math.random().toString(36).substring(2, 9);
+
+    verifyPaymentOnBackend(simOrder, simPayment, simSignature);
+  };
+
+  const verifyPaymentOnBackend = async (orderId, paymentId, signature) => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('claxic_token');
+      const res = await fetch('/api/payments/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          orderId,
+          paymentId,
+          signature,
+          applicationId: submittedApp.id,
+          paymentMethod: 'Razorpay Online Gateway (UPI/Card)',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Payment verification failed.');
+      }
+
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      onClose();
+      if (onSuccess) onSuccess(data.receiptNumber);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={step === 'form' ? 'Registration Form' : 'Payment & Seat Reservation'}
+      subtitle={course.title}
+      maxWidth="max-w-3xl"
+    >
+      <div className="space-y-6 font-sans">
+        {/* Error Notification */}
+        {error && (
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 font-medium">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {step === 'form' ? (
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            {/* Summary Card */}
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-0.5 rounded-full bg-yellow-50 text-yellow-900 border border-yellow-300 font-mono text-[10px] font-bold">
+                    {course.category}
+                  </span>
+                  <span className="px-3 py-0.5 rounded-full bg-[#FFF1EE] text-[#EE2D02] border border-[#FFD4CC] font-mono text-[10px] font-bold">
+                    {course.mode}
+                  </span>
+                </div>
+                <h4 className="text-base font-bold text-slate-900 font-display uppercase tracking-tight mt-2">
+                  {course.title}
+                </h4>
+                <p className="text-xs text-slate-500 font-mono mt-0.5">
+                  Batch Starts: {course.startDate} • Duration: {course.duration}
+                </p>
+              </div>
+              <div className="text-right">
+                {course.isFree || course.price === 0 ? (
+                  <>
+                    <div className="text-2xl font-extrabold font-mono text-emerald-600">
+                      FREE
+                    </div>
+                    <span className="text-[10px] font-mono text-emerald-700 uppercase font-bold">
+                      100% Free Tuition • No Payment
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold font-mono text-[#EE2D02]">
+                      ₹{course.price.toLocaleString('en-IN')}
+                    </div>
+                    <span className="text-[10px] font-mono text-[#EE2D02] uppercase font-semibold">
+                      Inclusive of 18% GST & Tax Invoice
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#EE2D02] border-b border-slate-200 pb-2">
+                1. Personal & Contact Information
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold">
+                    Full Legal Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 text-sm text-slate-900 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold">
+                    Official Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 text-sm text-slate-900 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold flex items-center justify-between">
+                  <span>Mobile Number (WhatsApp Enabled) *</span>
+                  {mobile && (
+                    <span className={`text-[10px] font-mono font-bold ${mobile.length === 10 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {mobile.length === 10 ? '✓ 10 Digits' : `${mobile.length}/10`}
+                    </span>
+                  )}
+                </label>
+                <div className="w-full bg-slate-50 hover:bg-slate-100 focus-within:bg-white border border-slate-200 focus-within:border-[#EE2D02] focus-within:ring-2 focus-within:ring-[#EE2D02]/15 rounded-full flex items-center transition-all overflow-hidden">
+                  <div className="flex items-center gap-1.5 pl-3.5 pr-2.5 py-2.5 border-r border-slate-200 select-none shrink-0 bg-slate-100 text-slate-800 font-mono font-bold text-xs sm:text-sm">
+                    <span className="text-sm leading-none">🇮🇳</span>
+                    <span>+91</span>
+                  </div>
+                  <input
+                    type="tel"
+                    required
+                    inputMode="numeric"
+                    maxLength={10}
+                    value={mobile}
+                    onChange={handleMobileChange}
+                    placeholder="Enter 10-digit mobile number"
+                    className="w-full bg-transparent px-3.5 py-2.5 text-sm text-slate-900 outline-none font-mono placeholder:font-sans placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#EE2D02] border-b border-slate-200 pb-2 pt-2">
+                2. Academic & Background Context
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold">
+                    Institution / University *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={institution}
+                    onChange={(e) => setInstitution(e.target.value)}
+                    placeholder="Stanford University / Enterprise Tech"
+                    className="w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 text-sm text-slate-900 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold">
+                    Degree / Specialization *
+                  </label>
+                  <DegreeSelect
+                    value={degree}
+                    onChange={setDegree}
+                    placeholder="Search degree or enter field (e.g. B.Tech, BCA...)"
+                    rounded="rounded-full"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold">
+                    Year of Study / Status
+                  </label>
+                  <select
+                    value={yearOfStudy}
+                    onChange={(e) => setYearOfStudy(e.target.value)}
+                    className="w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 text-sm text-slate-900 outline-none transition-all"
+                  >
+                    <option value="1st Year">1st Year Undergraduate</option>
+                    <option value="2nd Year">2nd Year Undergraduate</option>
+                    <option value="3rd Year">3rd Year Undergraduate</option>
+                    <option value="Final Year">Final Year Undergraduate</option>
+                    <option value="Postgraduate / Master">Postgraduate / Master</option>
+                    <option value="Working Professional">Working Professional</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold">
+                    Technical Proficiency
+                  </label>
+                  <select
+                    value={experienceLevel}
+                    onChange={(e) => setExperienceLevel(e.target.value)}
+                    className="w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-full px-4 py-2.5 text-sm text-slate-900 outline-none transition-all"
+                  >
+                    <option value="Beginner">Beginner (Basic JS/HTML)</option>
+                    <option value="Intermediate">Intermediate (React/Node basics)</option>
+                    <option value="Advanced">Advanced (Systems & DevOps)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Automated Schedule & Start Date Selection */}
+              <div className="p-4 rounded-2xl bg-[#FFF1EE] border border-[#FFD4CC] space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#EE2D02] font-bold">
+                    Preferred Course Start Date *
+                  </label>
+                  <span className="text-[10px] font-mono font-bold text-[#EE2D02] bg-white/80 border border-[#FFD4CC] px-2 py-0.5 rounded-md">
+                    Automated Daily Schedule
+                  </span>
+                </div>
+                <input
+                  type="date"
+                  required
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-xl px-3.5 py-2 text-sm text-slate-900 outline-none font-mono font-semibold"
+                />
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Your day-by-day learning schedule will automatically generate starting from this date. Daily class videos, topics, summaries, and quizzes will follow this schedule automatically.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 mb-1 font-semibold">
+                  Statement of Intent / Learning Goals
+                </label>
+                <textarea
+                  rows={2}
+                  value={statementOfIntent}
+                  onChange={(e) => setStatementOfIntent(e.target.value)}
+                  placeholder="Share what you hope to build or accomplish during this cohort..."
+                  className="w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-[#EE2D02] focus:ring-2 focus:ring-[#EE2D02]/15 rounded-2xl p-3.5 text-sm text-slate-900 outline-none transition-all"
+                />
+              </div>
+
+              {/* Policy Checkboxes */}
+              <div className="space-y-2 pt-2 text-xs">
+                <label className="flex items-center gap-2.5 text-slate-700 cursor-pointer font-medium">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="rounded border-slate-300 accent-[#EE2D02]"
+                  />
+                  <span>I agree to Claxic Cohort Terms & Code of Conduct.</span>
+                </label>
+                <label className="flex items-center gap-2.5 text-slate-700 cursor-pointer font-medium">
+                  <input
+                    type="checkbox"
+                    checked={agreedToRefundPolicy}
+                    onChange={(e) => setAgreedToRefundPolicy(e.target.checked)}
+                    className="rounded border-slate-300 accent-[#EE2D02]"
+                  />
+                  <span>I acknowledge the 7-day unconditional 100% money-back guarantee policy.</span>
+                </label>
+              </div>
+
+              {/* Draft Status Alert */}
+              {draftSavedMessage && (
+                <div className="p-3 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{draftSavedMessage}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                disabled={isSavingDraft}
+                className="w-full sm:w-auto px-6 py-3 rounded-full text-xs font-bold text-[#EE2D02] bg-[#FFF1EE] hover:bg-[#FFE5E0] border border-[#FFD4CC] transition-all cursor-pointer shrink-0 text-center"
+              >
+                Save Draft
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full py-3.5 px-6 sm:px-8 ${
+                  course.isFree || course.price === 0
+                    ? 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
+                    : 'bg-[#EE2D02] hover:bg-[#D02600] active:bg-[#B52000]'
+                } text-white font-bold text-sm rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50`}
+              >
+                <span>
+                  {course.isFree || course.price === 0
+                    ? 'Complete Free Enrollment 🎉'
+                    : 'Proceed to Razorpay Secure Payment'}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
+        ) : step === 'free_success' ? (
+          /* Step: Free Course Enrollment Success */
+          <div className="p-6 sm:p-10 rounded-[28px] bg-white border border-emerald-200 text-center space-y-4 shadow-sm animate-in fade-in duration-200">
+            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 border border-emerald-300 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            <div>
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Enrollment Confirmed: #{submittedApp?.applicationNumber || 'APPROVED'}
+              </span>
+              <h3 className="text-2xl font-bold text-slate-900 mt-3 font-display">
+                You're In! Welcome to {course.title}
+              </h3>
+              <p className="text-xs text-slate-600 max-w-md mx-auto mt-2 leading-relaxed">
+                Your 100% free enrollment has been confirmed. You now have full access to learning materials, schedule, and coursework.
+              </p>
+            </div>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  window.location.href = '/dashboard';
+                }}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+              >
+                Go to Student Learning Dashboard
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Step 2: Payment Checkout Overview */
+          <div className="space-y-6">
+            <div className="p-4 sm:p-8 rounded-[24px] sm:rounded-[32px] bg-white border border-slate-200 text-center space-y-4 shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-[#FFF1EE] text-[#EE2D02] border border-[#FFD4CC] flex items-center justify-center mx-auto">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <Badge variant="gold">Application Confirmed: #{submittedApp?.applicationNumber}</Badge>
+                <h3 className="text-xl font-bold text-slate-900 font-display mt-2 uppercase">
+                  Complete Payment Order
+                </h3>
+                <p className="text-xs text-slate-600 max-w-md mx-auto mt-1 font-normal">
+                  Your seat reservation request for <strong className="text-slate-900">{course.title}</strong> is active. Complete payment via Razorpay Gateway.
+                </p>
+              </div>
+
+              <div className="py-4 border-y border-slate-200 max-w-sm mx-auto space-y-2 font-mono text-sm">
+                <div className="flex justify-between text-slate-600">
+                  <span>Tuition Base:</span>
+                  <span>₹{Math.round(course.price / 1.18).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>GST (18%):</span>
+                  <span>₹{(course.price - Math.round(course.price / 1.18)).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between text-slate-900 font-bold text-base pt-2 border-t border-slate-200">
+                  <span>Total Due:</span>
+                  <span className="text-[#EE2D02]">₹{course.price.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2 max-w-md mx-auto">
+                <button
+                  onClick={handleRazorpayCheckout}
+                  disabled={isLoading}
+                  className="w-full py-3.5 px-6 rounded-full bg-[#EE2D02] hover:bg-[#D02600] active:bg-[#B52000] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <CreditCard className="w-5 h-5" />
+                  <span>Pay via Razorpay (UPI, Cards, NetBanking, EMI)</span>
+                </button>
+
+                <button
+                  onClick={simulatePaymentSuccess}
+                  className="w-full text-center text-xs font-mono text-[#EE2D02] hover:text-[#D02600] underline py-1 font-bold cursor-pointer"
+                >
+                  ⚡ Instant Demo Payment Simulation (Skip Gateway)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+};

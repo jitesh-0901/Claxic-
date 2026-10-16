@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { db, hashPassword } from '../db/index.js';
 import { extractToken, getUserByToken, requireAdmin } from '../middleware/index.js';
 import { destroyAllUserSessions } from '../services/auth.service.js';
-import { enrichCourseWithRealStaff } from './courses.routes.js';
+import { enrichCourseWithRealStaff } from '../common/courses.routes.js';
 
 const router = express.Router();
 

@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { db } from '../db/index.js';
 import { requireAuth } from '../middleware/index.js';
-import { enrichCourseWithRealStaff } from './courses.routes.js';
+import { enrichCourseWithRealStaff } from '../common/courses.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

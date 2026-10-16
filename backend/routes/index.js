@@ -1,12 +1,8 @@
 import express from 'express';
-import authRoutes from './auth.routes.js';
-import coursesRoutes from './courses.routes.js';
-import applicationsRoutes from './applications.routes.js';
-import paymentsRoutes from './payments.routes.js';
-import adminRoutes from './admin.routes.js';
-import staffRoutes from './staff.routes.js';
-import learningRoutes from './learning.routes.js';
-import notificationsRoutes from './notifications.routes.js';
+import { authRoutes, coursesRoutes, notificationsRoutes } from '../common/index.js';
+import { adminRoutes } from '../admin/index.js';
+import { staffRoutes } from '../staff/index.js';
+import studentRouter, { learningRoutes, applicationsRoutes, paymentsRoutes } from '../student/index.js';
 
 const router = express.Router();
 
@@ -14,42 +10,52 @@ const router = express.Router();
 router.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'Claxic Admissions Engine',
-    database: 'SQLite 3 WAL Engine',
+    service: 'Claxic Modular Admissions & Learning Engine',
+    database: 'SQLite 3 WAL Engine (Unified Master)',
     timestamp: new Date().toISOString(),
-    version: '1.0.0',
+    version: '2.0.0',
+    modules: ['student', 'staff', 'admin', 'common'],
   });
 });
 
 // API Directory Index
 router.get('/', (req, res) => {
   res.json({
-    name: 'Claxic Admissions API',
-    version: '1.0.0',
+    name: 'Claxic Modular API',
+    version: '2.0.0',
     documentation: 'https://claxic.edu/docs',
     endpoints: {
       auth: '/api/auth',
       courses: '/api/courses',
-      applications: '/api/applications',
-      payments: '/api/payments',
+      notifications: '/api/notifications',
       admin: '/api/admin',
       staff: '/api/staff',
+      student: '/api/student',
+      applications: '/api/applications',
+      payments: '/api/payments',
       learning: '/api/learning',
     },
   });
 });
 
-// Mount Route Modules
+// 1. Common / Shared Routes
 router.use('/auth', authRoutes);
 router.use('/courses', coursesRoutes);
-router.use('/applications', applicationsRoutes);
-router.use('/payments', paymentsRoutes);
-router.use('/admin', adminRoutes);
-router.use('/staff', staffRoutes);
-router.use('/learning', learningRoutes);
 router.use('/notifications', notificationsRoutes);
 
-// Compatibility alias for user applications, payments, courses, and projects
+// 2. Admin Module Routes
+router.use('/admin', adminRoutes);
+
+// 3. Staff Module Routes
+router.use('/staff', staffRoutes);
+
+// 4. Student Module Routes
+router.use('/student', studentRouter);
+router.use('/applications', applicationsRoutes);
+router.use('/payments', paymentsRoutes);
+router.use('/learning', learningRoutes);
+
+// 5. Compatibility aliases for user applications, payments, courses, and projects
 router.use('/user/applications', (req, res, next) => {
   req.url = '/user';
   applicationsRoutes(req, res, next);

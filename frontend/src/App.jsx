@@ -37,8 +37,8 @@ const AdminDashboardView = React.lazy(() => import('./admin/views/AdminDashboard
 const AdminLoginView = React.lazy(() => import('./admin/views/AdminLoginView.jsx').then(m => ({ default: m.AdminLoginView })));
 
 // Lazy-Loaded Modals
-const ApplicationModal = React.lazy(() => import('./components/modals/ApplicationModal.jsx').then(m => ({ default: m.ApplicationModal })));
-const ReceiptModal = React.lazy(() => import('./components/modals/ReceiptModal.jsx').then(m => ({ default: m.ReceiptModal })));
+const ApplicationModal = React.lazy(() => import('./student/modals/ApplicationModal.jsx').then(m => ({ default: m.ApplicationModal })));
+const ReceiptModal = React.lazy(() => import('./student/modals/ReceiptModal.jsx').then(m => ({ default: m.ReceiptModal })));
 const CourseModal = React.lazy(() => import('./admin/modals/CourseModal.jsx').then(m => ({ default: m.CourseModal })));
 const EmailSandboxModal = React.lazy(() => import('./admin/modals/EmailSandboxModal.jsx').then(m => ({ default: m.EmailSandboxModal })));
 
