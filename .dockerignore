@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.vscode
+.idea
+frontend/dist
+backend/db/claxic.db-journal
+backend/db/claxic.db-wal
+backend/db/claxic.db-shm
+.env.local
+.DS_Store
+Thumbs.db

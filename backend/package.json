@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch-path=routes --watch-path=middleware --watch-path=services --watch-path=server.js server.js",
-    "test": "node tests/test-persistence.js && node tests/test-staff-appointment.js && node tests/test-master-lms.js",
-    "test:master": "node tests/test-master-lms.js",
-    "staff:reset": "node scripts/reset-staff.js"
+    "test": "node ../scripts/self-host-check.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

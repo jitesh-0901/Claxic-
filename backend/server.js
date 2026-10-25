@@ -28,13 +28,26 @@ app.use((err, req, res, next) => {
   next();
 });
 
+// Mount Static Uploads Directories
+const uploadsDir = path.resolve(__dirname, '../uploads');
+if (fs.existsSync(uploadsDir)) {
+  app.use('/uploads', express.static(uploadsDir));
+}
+const backendUploadsDir = path.resolve(__dirname, 'uploads');
+if (fs.existsSync(backendUploadsDir)) {
+  app.use('/uploads', express.static(backendUploadsDir));
+}
+
 // Mount Main API Router FIRST
 app.use('/api', apiRouter);
 
 // Serve Frontend SPA if configured (SERVE_FRONTEND=true) OR in production when dist exists
+const distIndexExists = fs.existsSync(path.join(distPath, 'index.html'));
 const shouldServeFrontend =
-  (process.env.SERVE_FRONTEND === 'true' || process.env.NODE_ENV === 'production') &&
-  fs.existsSync(distPath);
+  (process.env.SERVE_FRONTEND === 'true' ||
+    process.env.NODE_ENV === 'production' ||
+    (!process.env.SERVE_FRONTEND && distIndexExists)) &&
+  distIndexExists;
 
 if (shouldServeFrontend) {
   app.use(express.static(distPath));
